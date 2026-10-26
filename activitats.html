@@ -4,25 +4,51 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Actividades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
+<header>
+<div class="barra">
+<a class="logo" href="index.html"><span class="logo-dado" data-valor="5" aria-hidden="true"></span>Punt de Joc</a>
 <nav>
 <a href="index.html">Inicio</a>
 <a href="activitats.html">Actividades</a>
 <a href="torneig.html">Torneo</a>
 </nav>
+</div>
+</header>
 <main>
+<div class="titulo-pagina">
 <h1>Actividades</h1>
-<article>
+<p>Coge tu ficha y apúntate a la próxima partida</p>
+</div>
+<div class="tarjetas">
+<article data-fecha="2026-11-12">
+<span class="etiqueta">Encuentro</span>
+<span class="cuenta"></span>
 <h2>Tarde de juegos</h2>
-<p>Encuentro · 12 noviembre 2026 · Local de la asociación · 16 plazas.</p>
+<ul class="datos">
+<li>📅 12 noviembre 2026</li>
+<li>📍 Local de la asociación</li>
+<li>👥 16 plazas</li>
+</ul>
 </article>
-<article>
+<article class="torneo" data-fecha="2026-11-19">
+<span class="etiqueta">Torneo</span>
+<span class="cuenta"></span>
 <h2>Liga de demostración</h2>
-<p>Torneo · 19 noviembre 2026 · Local de la asociación · 4 plazas.</p>
-<a href="torneig.html">Rondas y clasificación</a>
+<ul class="datos">
+<li>📅 19 noviembre 2026</li>
+<li>📍 Local de la asociación</li>
+<li>👥 4 plazas</li>
+</ul>
+<a class="boton" href="torneig.html">Rondas y clasificación</a>
 </article>
+</div>
 </main>
 <footer>DAW2 · AEA2 · RA1</footer>
 </body>

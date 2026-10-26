@@ -4,62 +4,93 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Liga de demostración</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
+<header>
+<div class="barra">
+<a class="logo" href="index.html"><span class="logo-dado" data-valor="5" aria-hidden="true"></span>Punt de Joc</a>
 <nav>
 <a href="index.html">Inicio</a>
 <a href="activitats.html">Actividades</a>
 <a href="torneig.html">Torneo</a>
 </nav>
+</div>
+</header>
 <main>
+<div class="titulo-pagina">
 <h1>Liga de demostración</h1>
 <p>Formato didáctico: victoria 3 puntos, empate 1, derrota 0. No es un reglamento oficial.</p>
+</div>
+<section class="panel">
 <h2>Participantes</h2>
-<ul>
+<ul class="jugadores">
 <li>Aina</li>
 <li>Biel</li>
 <li>Cris</li>
 <li>Dani</li>
 </ul>
+<ul class="reglas">
+<li>🏆 Victoria · 3</li>
+<li>🤝 Empate · 1</li>
+<li>❌ Derrota · 0</li>
+</ul>
+</section>
+<section class="panel">
 <h2>Ronda 1</h2>
+<div class="tabla">
 <table>
 <caption>Resultados ficticios</caption>
+<thead>
 <tr>
 <th>Participante A</th>
 <th>Participante B</th>
 <th>Resultado</th>
 </tr>
+</thead>
+<tbody>
 <tr>
 <td>Aina</td>
 <td>Biel</td>
-<td>Victoria A</td>
+<td><span class="resultado">Victoria A</span></td>
 </tr>
 <tr>
 <td>Cris</td>
 <td>Dani</td>
-<td>Empate</td>
+<td><span class="resultado empate">Empate</span></td>
 </tr>
+</tbody>
 </table>
+</div>
+</section>
+<section class="panel">
 <h2>Clasificación</h2>
-<table>
+<div class="tabla">
+<table class="clasificacion">
 <caption>Después de la primera ronda</caption>
+<thead>
 <tr>
 <th>Posición</th>
 <th>Alias</th>
 <th>Puntos</th>
 </tr>
-<tr>
+</thead>
+<tbody>
+<tr class="oro">
 <td>1</td>
 <td>Aina</td>
 <td>3</td>
 </tr>
-<tr>
+<tr class="plata">
 <td>2</td>
 <td>Cris</td>
 <td>1</td>
 </tr>
-<tr>
+<tr class="plata">
 <td>2</td>
 <td>Dani</td>
 <td>1</td>
@@ -69,7 +100,10 @@
 <td>Biel</td>
 <td>0</td>
 </tr>
+</tbody>
 </table>
+</div>
+</section>
 </main>
 <footer>DAW2 · AEA2 · RA1</footer>
 </body>

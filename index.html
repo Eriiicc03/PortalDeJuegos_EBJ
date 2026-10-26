@@ -4,23 +4,50 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Punt de Joc</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
+<script src="script.js" defer></script>
 </head>
 <body>
+<header>
+<div class="barra">
+<a class="logo" href="index.html"><span class="logo-dado" data-valor="5" aria-hidden="true"></span>Punt de Joc</a>
 <nav>
 <a href="index.html">Inicio</a>
 <a href="activitats.html">Actividades</a>
 <a href="torneig.html">Torneo</a>
 </nav>
+</div>
+</header>
 <main>
+<section class="panel hero">
+<div>
 <h1>Punt de Joc</h1>
-<p>Una asociación que organiza encuentros y torneos presenciales de juegos de mesa.</p>
+<p class="lema">Una asociación que organiza encuentros y torneos presenciales de juegos de mesa.</p>
+<a class="boton" href="activitats.html">Consulta las actividades</a>
+</div>
+<div class="mesa">
+<div class="dados">
+<div class="dado" data-valor="6" role="img"></div>
+<div class="dado" data-valor="3" role="img"></div>
+</div>
+<p class="tirada" id="tirada" aria-live="polite">¿Te atreves a tirar?</p>
+<button class="boton azul" id="tirar" type="button">🎲 Tirar dados</button>
+</div>
+</section>
+<section class="panel">
 <h2>Nuestra comunidad</h2>
 <p>Este es un prototipo. Elegid el nombre, los juegos y la identidad de vuestra asociación.</p>
-<p>
-<a href="activitats.html">Consulta las actividades</a>
-</p>
+<div class="colores">
+<div class="ficha rojo"><span>♟️</span>Estrategia</div>
+<div class="ficha azul"><span>🃏</span>Cartas</div>
+<div class="ficha amarillo"><span>🎲</span>Dados</div>
+<div class="ficha verde"><span>🧩</span>Cooperativos</div>
+</div>
 <aside>Los datos son ficticios. No hay inscripciones ni resultados persistentes en esta versión.</aside>
+</section>
 </main>
 <footer>DAW2 · AEA2 · RA1</footer>
 </body>

@@ -1,14 +1,11 @@
 # Evidencias individuales — Eric (AEA2 · Portal de Juegos)
-
-Fecha de las pruebas: 5 de noviembre de 2026.
-
 ## Entorno
 
-| Elemento | Valor (salida real) |
+| Elemento | Valor|
 |---|---|
-| Sistema | Ubuntu 26.04.1 LTS (resolute) |
-| Servidor web | Apache/2.4.66 (Ubuntu) |
-| PHP | php8.5-fpm 8.5.4-0ubuntu1.5 y php8.5-cli 8.5.4-0ubuntu1.5 |
+| Sistema | Ubuntu |
+| Servidor web | Apache |
+| PHP | php8.5 |
 | Repositorio | `https://github.com/Eriiicc03/PortalDeJuegos_EBJ.git`, clonado en `/var/www/html/php/AEA2` |
 
 ```

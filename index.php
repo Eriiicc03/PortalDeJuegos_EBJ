@@ -5,6 +5,7 @@ date_default_timezone_set('Europe/Madrid');
 $activitats = [
   ['titol' => 'Tarde de juegos', 'tipus' => 'Encuentro', 'data' => '2026-11-12', 'lloc' => 'Local de la asociación', 'places' => 16, 'torneig' => false],
   ['titol' => 'Liga de demostración', 'tipus' => 'Torneo', 'data' => '2026-11-19', 'lloc' => 'Local de la asociación', 'places' => 4, 'torneig' => true],
+  ['titol' => 'Iniciación a juegos de rol', 'tipus' => 'Taller', 'data' => '2026-11-26', 'lloc' => 'Local de la asociación', 'places' => 8, 'torneig' => false],
 ];
 
 $participants = ['Aina', 'Biel', 'Cris', 'Dani'];

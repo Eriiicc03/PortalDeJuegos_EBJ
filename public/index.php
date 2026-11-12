@@ -1,28 +1,14 @@
 <?php
-// Datos del portal: todavía no hay base de datos, todo vive en el código.
+// Datos del portal: se leen de MariaDB (base puntdejoc) con la cuenta de solo lectura.
+require __DIR__ . '/../src/funciones.php';
 date_default_timezone_set('Europe/Madrid');
 
-$activitats = [
-  ['titol' => 'Tarde de juegos', 'tipus' => 'Encuentro', 'data' => '2026-11-12', 'lloc' => 'Local de la asociación', 'places' => 16, 'torneig' => false],
-  ['titol' => 'Liga de demostración', 'tipus' => 'Torneo', 'data' => '2026-11-19', 'lloc' => 'Local de la asociación', 'places' => 4, 'torneig' => true],
-  ['titol' => 'Iniciación a juegos de rol', 'tipus' => 'Taller', 'data' => '2026-11-26', 'lloc' => 'Local de la asociación', 'places' => 8, 'torneig' => false],
-];
-
-$participants = ['Aina', 'Biel', 'Cris', 'Dani'];
-
-// Resultado: 'A' gana A, 'B' gana B, 'X' empate
-$ronda1 = [
-  ['a' => 'Aina', 'b' => 'Biel', 'resultat' => 'A'],
-  ['a' => 'Cris', 'b' => 'Dani', 'resultat' => 'X'],
-];
-
+// El prototipo consulta siempre el torneo con ID 2
+const TORNEIG_ID = 2;
 const PUNTS = ['victoria' => 3, 'empat' => 1, 'derrota' => 0];
 const MESOS = [1 => 'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
-function h(string $text): string
-{
-  return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
-}
+const TIPUS = ['trobada' => 'Encuentro', 'torneig' => 'Torneo'];
+const ESTATS = ['oberta' => 'Inscripción abierta', 'en_curs' => 'En curso', 'finalitzada' => 'Finalizada'];
 
 function data_llarga(string $data): string
 {
@@ -40,43 +26,69 @@ function compte_enrere(string $data): string
   return 'Finalizada';
 }
 
-function text_resultat(string $resultat): string
+// resultat: 'A' gana A, 'B' gana B, 'E' empate, NULL pendiente
+function text_resultat(?string $resultat): string
 {
   return match ($resultat) {
     'A' => 'Victoria A',
     'B' => 'Victoria B',
-    default => 'Empate'
+    'E' => 'Empate',
+    default => 'Pendiente'
   };
 }
 
-// Clasificación calculada a partir de los resultados; empates comparten posición
-function classificacio(array $participants, array $partides): array
+function classe_resultat(?string $resultat): string
 {
-  $punts = array_fill_keys($participants, 0);
-  foreach ($partides as $p) {
-    if ($p['resultat'] === 'X') {
-      $punts[$p['a']] += PUNTS['empat'];
-      $punts[$p['b']] += PUNTS['empat'];
-    } else {
-      $guanyador = $p['resultat'] === 'A' ? $p['a'] : $p['b'];
-      $punts[$guanyador] += PUNTS['victoria'];
-    }
-  }
-  arsort($punts);
-  $taula = [];
-  $posicio = 0;
-  $anterior = null;
-  $i = 0;
-  foreach ($punts as $alias => $p) {
-    $i++;
-    if ($p !== $anterior) $posicio = $i;
-    $anterior = $p;
-    $taula[] = ['posicio' => $posicio, 'alias' => $alias, 'punts' => $p];
-  }
-  return $taula;
+  return match ($resultat) {
+    'E' => ' empate',
+    null => ' pendiente',
+    default => ''
+  };
 }
 
-$classificacio = classificacio($participants, $ronda1);
+try {
+  $pdo = db();
+  $activitats = $pdo->query(
+    "SELECT a.id, a.titol, a.tipus, a.estat, a.data, a.lloc, a.places, j.nom AS joc
+     FROM activitats a JOIN jocs j ON j.id = a.joc_id
+     WHERE a.estat <> 'borrador'
+     ORDER BY a.data, a.id"
+  )->fetchAll();
+
+  $consulta = $pdo->prepare('SELECT titol FROM activitats WHERE id = ?');
+  $consulta->execute([TORNEIG_ID]);
+  $titol_torneig = $consulta->fetchColumn() ?: 'Torneo';
+
+  $consulta = $pdo->prepare('SELECT id, alias FROM inscripcions WHERE activitat_id = ? ORDER BY id');
+  $consulta->execute([TORNEIG_ID]);
+  $participants = $consulta->fetchAll();
+
+  $consulta = $pdo->prepare(
+    'SELECT p.id, p.participant_a, p.participant_b, p.resultat, r.numero,
+            ia.alias AS alias_a, ib.alias AS alias_b
+     FROM partides p
+     JOIN rondes r ON r.id = p.ronda_id
+     JOIN inscripcions ia ON ia.id = p.participant_a
+     JOIN inscripcions ib ON ib.id = p.participant_b
+     WHERE r.activitat_id = ?
+     ORDER BY r.numero, p.id'
+  );
+  $consulta->execute([TORNEIG_ID]);
+  $partides = $consulta->fetchAll();
+} catch (PDOException $e) {
+  error_log($e->getMessage());
+  http_response_code(503);
+  exit('No se puede consultar la base de datos. Comprueba el servicio, las credenciales y el registro del servidor.');
+}
+
+// Partidas agrupadas por número de ronda
+$rondes = [];
+foreach ($partides as $partida) {
+  $rondes[(int) $partida['numero']][] = $partida;
+}
+
+$classificacio = classificacio($participants, $partides);
+$jugades = count(array_filter($partides, fn($p) => $p['resultat'] !== null));
 ?>
 <!doctype html>
 <html lang="es">
@@ -706,6 +718,11 @@ $classificacio = classificacio($participants, $ronda1);
       color: var(--tinta)
     }
 
+    .resultado.pendiente {
+      background: #e5e7eb;
+      color: var(--suave)
+    }
+
     .reglas {
       display: flex;
       gap: .6rem;
@@ -868,7 +885,7 @@ $classificacio = classificacio($participants, $ronda1);
           <div class="ficha amarillo"><span>🎲</span>Dados</div>
           <div class="ficha verde"><span>🧩</span>Cooperativos</div>
         </div>
-        <aside>Los datos son ficticios. No hay inscripciones ni resultados persistentes en esta versión.</aside>
+        <aside>Los datos son ficticios, pero ya son persistentes: se leen de MariaDB en cada petición.</aside>
       </div>
     </section>
 
@@ -879,16 +896,18 @@ $classificacio = classificacio($participants, $ronda1);
       </div>
       <div class="tarjetas">
         <?php foreach ($activitats as $activitat): ?>
-          <article<?= $activitat['torneig'] ? ' class="torneo"' : '' ?>>
-            <span class="etiqueta"><?= h($activitat['tipus']) ?></span>
+          <article<?= $activitat['tipus'] === 'torneig' ? ' class="torneo"' : '' ?>>
+            <span class="etiqueta"><?= h(TIPUS[$activitat['tipus']]) ?></span>
             <span class="cuenta"><?= h(compte_enrere($activitat['data'])) ?></span>
             <h2><?= h($activitat['titol']) ?></h2>
             <ul class="datos">
+              <li>🎯 <?= h(ESTATS[$activitat['estat']] ?? $activitat['estat']) ?></li>
+              <li>♟️ <?= h($activitat['joc']) ?></li>
               <li>📅 <?= h(data_llarga($activitat['data'])) ?></li>
               <li>📍 <?= h($activitat['lloc']) ?></li>
-              <li>👥 <?= $activitat['places'] ?> plazas</li>
+              <li>👥 <?= (int) $activitat['places'] ?> plazas</li>
             </ul>
-            <?php if ($activitat['torneig']): ?>
+            <?php if ((int) $activitat['id'] === TORNEIG_ID): ?>
               <a class="boton" href="#torneo">Rondas y clasificación</a>
             <?php endif; ?>
             </article>
@@ -898,14 +917,14 @@ $classificacio = classificacio($participants, $ronda1);
 
     <section id="torneo">
       <div class="titulo-pagina">
-        <h1>Liga de demostración</h1>
+        <h1><?= h($titol_torneig) ?></h1>
         <p>Formato didáctico: victoria <?= PUNTS['victoria'] ?> puntos, empate <?= PUNTS['empat'] ?>, derrota <?= PUNTS['derrota'] ?>. No es un reglamento oficial.</p>
       </div>
       <div class="panel">
         <h2>Participantes</h2>
         <ul class="jugadores">
           <?php foreach ($participants as $participant): ?>
-            <li><?= h($participant) ?></li>
+            <li><?= h($participant['alias']) ?></li>
           <?php endforeach; ?>
         </ul>
         <ul class="reglas">
@@ -914,39 +933,45 @@ $classificacio = classificacio($participants, $ronda1);
           <li>❌ Derrota · <?= PUNTS['derrota'] ?></li>
         </ul>
       </div>
-      <div class="panel">
-        <h2>Ronda 1</h2>
-        <div class="tabla">
-          <table>
-            <caption>Resultados ficticios</caption>
-            <thead>
-              <tr>
-                <th>Participante A</th>
-                <th>Participante B</th>
-                <th>Resultado</th>
-              </tr>
-            </thead>
-            <tbody>
-              <?php foreach ($ronda1 as $partida): ?>
+      <?php foreach ($rondes as $numero => $partides_ronda): ?>
+        <div class="panel">
+          <h2>Ronda <?= $numero ?></h2>
+          <div class="tabla">
+            <table>
+              <caption>Resultados ficticios</caption>
+              <thead>
                 <tr>
-                  <td><?= h($partida['a']) ?></td>
-                  <td><?= h($partida['b']) ?></td>
-                  <td><span class="resultado<?= $partida['resultat'] === 'X' ? ' empate' : '' ?>"><?= text_resultat($partida['resultat']) ?></span></td>
+                  <th>Participante A</th>
+                  <th>Participante B</th>
+                  <th>Resultado</th>
                 </tr>
-              <?php endforeach; ?>
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                <?php foreach ($partides_ronda as $partida): ?>
+                  <tr>
+                    <td><?= h($partida['alias_a']) ?></td>
+                    <td><?= h($partida['alias_b']) ?></td>
+                    <td><span class="resultado<?= classe_resultat($partida['resultat']) ?>"><?= text_resultat($partida['resultat']) ?></span></td>
+                  </tr>
+                <?php endforeach; ?>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      <?php endforeach; ?>
       <div class="panel">
         <h2>Clasificación</h2>
         <div class="tabla">
           <table class="clasificacion">
-            <caption>Después de la primera ronda</caption>
+            <caption><?= $jugades ?> de <?= count($partides) ?> partidas jugadas · las pendientes no cuentan</caption>
             <thead>
               <tr>
                 <th>Posición</th>
                 <th>Alias</th>
+                <th>Jugadas</th>
+                <th>V</th>
+                <th>E</th>
+                <th>D</th>
                 <th>Puntos</th>
               </tr>
             </thead>
@@ -959,6 +984,10 @@ $classificacio = classificacio($participants, $ronda1);
                     } ?>>
                   <td><?= $fila['posicio'] ?></td>
                   <td><?= h($fila['alias']) ?></td>
+                  <td><?= $fila['jugades'] ?></td>
+                  <td><?= $fila['victories'] ?></td>
+                  <td><?= $fila['empats'] ?></td>
+                  <td><?= $fila['derrotes'] ?></td>
                   <td><?= $fila['punts'] ?></td>
                   </tr>
                 <?php endforeach; ?>
@@ -968,7 +997,7 @@ $classificacio = classificacio($participants, $ronda1);
       </div>
     </section>
   </main>
-  <footer>DAW2 · AEA2 · RA1 · Respuesta generada en el servidor: <?= date('H:i:s') ?></footer>
+  <footer>DAW2 · AEA3 · RA1 · Respuesta generada en el servidor: <?= date('H:i:s') ?></footer>
   <script>
     // Posiciones de los puntos en una cuadrícula 3x3 para cada cara del dado
     const CARAS = {

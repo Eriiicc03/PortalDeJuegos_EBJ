@@ -13,6 +13,8 @@ Portal de la asociación Punto de Juego. Desde la etapa 3 (AEA3) los datos (acti
 | `scripts/instalar.sh` | Crea y carga la base, crea la cuenta, configura FPM y despliega |
 | `docs/BASE-DE-DATOS.md` | Análisis del modelo, orden de dependencias, permisos, pruebas y límites del esquema |
 | `docs/evidencias/` | Evidencias individuales de cada integrante (no se sirven por web) |
+| `java/tornejos.war` | Aplicación Java de torneos (etapa 4) para Tomcat 10.1 |
+| `java/tornejos.xml.example` | Plantilla de la configuración JNDI, sin credenciales |
 | `READMEDATABASE.md` | Material de apoyo del encargo 3 (SQL de creación y carga) |
 
 ## Versiones
@@ -20,6 +22,7 @@ Portal de la asociación Punto de Juego. Desde la etapa 3 (AEA3) los datos (acti
 - Entrega estática: etiqueta `v1-estatica` (`git checkout v1-estatica`).
 - Versión PHP sin base de datos: commit `91a5b56`.
 - Versión PHP + MariaDB: rama `eric/aea3-bdd`.
+- Aplicación Java de torneos: `java/tornejos.war`, sha256 `9777a16281051ab6a289939abd364edc2583544c3c26edb9571a4407e30db336` (MariaDB Connector/J 3.5.11 incluido), rama `eric/aea4-java`.
 
 ## Requisitos
 
@@ -48,6 +51,18 @@ sudo mariadb < sql/05-actualizacion.sql                             # UPDATE par
 sudo mariadb --force -v puntdejoc < sql/06-pruebas-restricciones.sql # errores esperados
 ```
 
+## Aplicación Java (Tomcat)
+
+Requisitos: JDK 17 o 21 y Tomcat 10.1 (en Ubuntu: `openjdk-21-jdk-headless` y `tomcat10`). Apache, PHP-FPM y MariaDB se mantienen.
+
+1. Tomcat solo en local: en `/etc/tomcat10/server.xml`, `<Connector port="8080" address="127.0.0.1" ...>`.
+2. Cuenta Java (`SELECT` en `puntdejoc.*` y `UPDATE` solo de `resultat` en `partides`): editar la contraseña de `sql/07-cuenta-java.sql` y ejecutar `sudo mariadb < sql/07-cuenta-java.sql`.
+3. Configuración JNDI fuera del WAR: copiar `java/tornejos.xml.example` en `/etc/tomcat10/Catalina/localhost/tornejos.xml`, poner la contraseña, y `sudo chown root:tomcat` + `sudo chmod 640`.
+4. Despliegue: `sudo cp java/tornejos.war /var/lib/tomcat10/webapps/`. No va en la raíz de Apache.
+5. Comprobar `http://127.0.0.1:8080/tornejos/`. Logs en `/var/log/tomcat10/`.
+
+Las credenciales reales no se guardan en Git (`tornejos.xml` está en `.gitignore`).
+
 ## Evidencias
 
-- [Eric](docs/evidencias/Eric/eric.md)
+- Eric: [PHP + MariaDB](docs/evidencias/Eric/eric.md) · [Java + Tomcat](docs/evidencias/Eric/eric-java.md)

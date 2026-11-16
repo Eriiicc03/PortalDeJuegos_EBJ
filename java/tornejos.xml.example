@@ -1,0 +1,7 @@
+<!-- Copiar en /etc/tomcat10/Catalina/localhost/tornejos.xml (root:tomcat, 640).
+     Sustituir CAMBIAR por la contraseña de la cuenta Java de cada ordenador. No subir el archivo real a Git. -->
+<Context>
+  <Environment name="jdbcUrl" type="java.lang.String" value="jdbc:mariadb://127.0.0.1:3306/puntdejoc" override="false"/>
+  <Environment name="jdbcUser" type="java.lang.String" value="tornejos" override="false"/>
+  <Environment name="jdbcPassword" type="java.lang.String" value="CAMBIAR" override="false"/>
+</Context>

@@ -919,6 +919,7 @@ $jugades = count(array_filter($partides, fn($p) => $p['resultat'] !== null));
       <div class="titulo-pagina">
         <h1><?= h($titol_torneig) ?></h1>
         <p>Formato didáctico: victoria <?= PUNTS['victoria'] ?> puntos, empate <?= PUNTS['empat'] ?>, derrota <?= PUNTS['derrota'] ?>. No es un reglamento oficial.</p>
+        <a class="boton azul" href="http://127.0.0.1:8080/tornejos/">Gestionar torneos (Java)</a>
       </div>
       <div class="panel">
         <h2>Participantes</h2>
